@@ -1,0 +1,22 @@
+@import "abstracts/colors";
+//* @import url("abstracts/_colors.scss");* It usually comes to our preferences but we can also define like this using url ()
+@import "abstracts/mixins";
+// @import url(abstracts/_mixins.scss);
+@import "base/base";
+//@import url(base/_base.scss);
+@import "components/a11y";
+//@import url("components/_a11y.scss");
+@import "components/button";
+//@import url("components/_button.scss");
+@import "components/fadein";
+//@import url("components/_fadein.scss");
+@import "layout/searchBar";
+//@import url("layout/_searchBar.scss");
+@import "layout/navButton";
+//@import url("layout/_navButton.scss");
+@import "layout/currentForecast";
+//@import url("layout/_currentForecast.scss");
+@import "layout/dailyForecast";
+//@import url("layout/_dailyForecast.scss");
+@import "themes/backgrounds";
+//@import url("themes/_backgrounds.scss");

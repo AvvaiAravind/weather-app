@@ -1,0 +1,6 @@
+.navButtons {
+  @include flexCenter;
+  justify-content: space-evenly;
+  flex-grow: 1;
+  padding: 0.5rem 0.25rem;
+}
