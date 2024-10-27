@@ -2,12 +2,21 @@ import "../css/style.css"; /*  for importing style.css */
 import { getElementFromDOM } from "./utilityFunctions";
 import { CurrentLocation } from "./currentLocation";
 import {
+  setPlaceholderText,
   addSpinner,
   displayError,
   updateScreenReaderMsg,
   updateWeatherLocationHeader,
+  displayApiErrror,
+  updateDisplay,
 } from "./domFunctions";
-import { setLocationObj, getHomeLocation, cleanText } from "./dataFunction";
+import {
+  setLocationObj,
+  getHomeLocation,
+  cleanText,
+  getCoordsFrmAPI,
+  getWeatherFromCoords,
+} from "./dataFunction";
 
 //object creation
 
@@ -36,6 +45,8 @@ function initApp() {
 
   const locationEntry = getElementFromDOM("id", "searchBar__form");
   locationEntry.addEventListener("submit", submitNewLocation);
+
+  setPlaceholderText();
 
   loadWeather();
 }
@@ -164,17 +175,98 @@ async function submitNewLocation(event) {
   if (!userText.length) return;
   const searchIcon = getElementFromDOM("querySelector", ".fa-search");
   addSpinner(searchIcon);
-  const coords = await getCoordsFrmAPI(userText, currentLocObjFrmCls.unit);
+  const coordsData = await getCoordsFrmAPI(userText, currentLocObjFrmCls.unit);
+  if (coordsData) {
+    if (coordsData.response.status === 200) {
+      const coordsObj = {
+        lat: coordsData.weatherData.latitude,
+        lon: coordsData.weatherData.longitude,
+        name: coordsData.weatherData.resolvedAddress
+          ? `${coordsData.weatherData.resolvedAddress}`
+          : `Lat ${coordsData.weatherData.latitude} Lon${coordsData.weatherData.longitude}`,
+      };
+      setLocationObj(currentLocObjFrmCls, coordsObj);
+      updateDataAndDisplay(currentLocObjFrmCls);
+    } else {
+      displayApiErrror(coordsData.response.statusText);
+    }
+  } else {
+    displayError("Connnection Error", "Connection Error");
+  }
+
+  /*   const APIKey = `31eb3e7c412e0cadc4c4669b71f5f9cf`;
+  const weather = await fetch(
+    `https://api.openweathermap.org/data/2.5/weather?q=${userText}&appid=${APIKey}&units=metric`
+  );
+  console.log(weather.json()); */
 }
 
 // updateing data and display
 
-async function updateDataAndDisplay(locationObj) {
-  console.log("Updating data and display", locationObj);
+async function updateDataAndDisplay(currentLocObjFrmCls) {
+  console.log("Updating data and display", currentLocObjFrmCls);
 
-  /*  const weatherJson = await getWeatherFromCoords(locationObj);
-  console.log(weatherJson); */
-  /* if (weatherJson) {
-    updateDisplay(weatherJson, locationObj);
-  } */
+  const coordsData = await getWeatherFromCoords(currentLocObjFrmCls);
+  console.log(
+    "Got weather json from api with lat and lon",
+    coordsData.weatherData
+  );
+  if (coordsData.weatherData) {
+    updateDisplay(coordsData.weatherData, currentLocObjFrmCls);
+  }
 }
+
+/* prototype
+promiseState: "fulfilled"
+promiseResult: object
+base: "stations";
+ clouds:
+  all: 20
+  prototype: object
+  cod: 200 // sucess or failure means 404
+  coord:
+   lat: 19.233
+   lon: 72.22
+   prototype: object
+   dt: 1234332
+   id: 1274
+   main:
+    feels_like: 28.76
+    grnd_level: 1011
+    humidity: 69
+    pressure: 1011
+    temp: 26.20
+    temp_max: 26.90
+    temp_min: 25.94
+    prototype: object
+    name: "Mumbai"
+    sys:
+     country: "IN"
+     id: 9052
+     sunrise: 1729991207
+     sunset: 1298838
+     type: 1
+     prototype: object
+     timezone: 19800
+     visibility: 1700
+     weather: Array(1)
+     0: 
+      description: "haze"
+      icon: "50d"
+      id: 2433
+      main: "haze"
+      prototype: object
+      wind:
+       deg: 90
+       speed: 2.05
+       prototype: object
+      prototype: object
+   
+   */
+/* if failed
+  prototype
+promiseState: "fulfilled"
+promiseResult: object
+ cod: "404"
+ message: "city not founcd"
+*/
