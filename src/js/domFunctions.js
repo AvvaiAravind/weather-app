@@ -85,7 +85,7 @@ export function updateDisplay(weatherDataFrmApi, currentLocObjFrmCls) {
 function fadeDisplay() {
   const currentconditionSection = getElementFromDOM("id", "currentForecast");
   currentconditionSection.classList.toggle("zero-vis");
-  currentconditionSection.classList.toggle("fad-in");
+  currentconditionSection.classList.toggle("fade-in");
   const sixDaySection = getElementFromDOM("id", "dailyForecast");
   sixDaySection.classList.toggle("zero-vis");
   sixDaySection.classList.toggle("fade-in");
