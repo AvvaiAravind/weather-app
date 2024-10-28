@@ -81,6 +81,7 @@
       @include flexCenter;
       grid-row: 4 / span 1;
       grid-column: 1 / span 4;
+      text-align: center;
       @include mqMaxWMinH(1024px, 650px) {
         margin-top: 1.5rem;
       }

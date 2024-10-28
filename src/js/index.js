@@ -9,6 +9,7 @@ import {
   updateWeatherLocationHeader,
   displayApiErrror,
   updateDisplay,
+  clearDisplay,
 } from "./domFunctions";
 import {
   setLocationObj,
@@ -21,7 +22,6 @@ import {
 //object creation
 
 const currentLocObjFrmCls = new CurrentLocation();
-console.log(currentLocObjFrmCls);
 
 // dom loaded
 document.addEventListener("DOMContentLoaded", initApp);
@@ -68,11 +68,6 @@ function getGeoWeather(event) {
 
 function geoError(errObj) {
   const errMsg = errObj ? errObj.message : "Geolocation is not supported";
-  console.log(
-    "Error accessing geo location",
-    errObj.message || "Gelocation is not supported",
-    errObj
-  );
 
   displayError(errMsg, errMsg);
 }
@@ -83,9 +78,8 @@ function geoSuccess(position) {
   const liveLocationObj = {
     lat: position.coords.latitude,
     lon: position.coords.longitude,
-    name: `Lat ${position.coords.latitude} and lon ${position.coords.longitude}`,
+    name: `Lat: ${position.coords.latitude} and Lon: ${position.coords.longitude}`,
   };
-  console.log("Got geo location", liveLocationObj);
 
   setLocationObj(currentLocObjFrmCls, liveLocationObj);
   updateDataAndDisplay(currentLocObjFrmCls);
@@ -98,6 +92,7 @@ function loadWeather(event) {
   if (!savedLoc && !event) {
     return getGeoWeather();
   } else if (!savedLoc && event.type === "click") {
+    clearDisplay();
     displayError(
       "Home location is not saved. So please save the location first",
       "Home location is not saved. So please save the location first"
@@ -130,7 +125,7 @@ function displayHomeLocationWeather(homeLoc) {
 // saving current location to storage
 
 function saveCurrentLocation() {
-  if (currentLocObjFrmCls.lat && currentLocObjFrmCls.lon) {
+  if (currentLocObjFrmCls.lat !== null && currentLocObjFrmCls.lon !== null) {
     const saveIcon = getElementFromDOM("querySelector", ".fa-save");
     addSpinner(saveIcon);
     const currentLocObj = {
@@ -139,14 +134,15 @@ function saveCurrentLocation() {
       name: currentLocObjFrmCls.name,
       unit: currentLocObjFrmCls.unit,
     };
-    console.log("saving current location to local storage", currentLocObj);
 
     localStorage.setItem("savedLocation", JSON.stringify(currentLocObj));
-    updateWeatherLocationHeader(
-      `Current location ${currentLocObjFrmCls.name} is saved`
-    );
-    updateScreenReaderMsg(
-      "Current location ${currentLocObjFrmCls.name} is saved"
+    updateWeatherLocationHeader(`Current location is saved`);
+    updateScreenReaderMsg("Current location is saved");
+  } else {
+    clearDisplay();
+    displayError(
+      "Enable to get location coordinates please ensure location is turned on",
+      "Enable to get location coordinates please ensure location is turned on"
     );
   }
 }
@@ -181,92 +177,44 @@ async function submitNewLocation(event) {
       const coordsObj = {
         lat: coordsData.weatherData.latitude,
         lon: coordsData.weatherData.longitude,
-        name: coordsData.weatherData.resolvedAddress
-          ? `${coordsData.weatherData.resolvedAddress}`
-          : `Lat ${coordsData.weatherData.latitude} Lon${coordsData.weatherData.longitude}`,
+        name: coordsData.weatherData.address
+          ? `${coordsData.weatherData.address}`
+          : `Lat: ${coordsData.weatherData.latitude} Lon: ${coordsData.weatherData.longitude}`,
       };
       setLocationObj(currentLocObjFrmCls, coordsObj);
       updateDataAndDisplay(currentLocObjFrmCls);
     } else {
+      clearDisplay();
       displayApiErrror(coordsData.response.statusText);
     }
   } else {
+    clearDisplay();
     displayError("Connnection Error", "Connection Error");
   }
-
-  /*   const APIKey = `31eb3e7c412e0cadc4c4669b71f5f9cf`;
-  const weather = await fetch(
-    `https://api.openweathermap.org/data/2.5/weather?q=${userText}&appid=${APIKey}&units=metric`
-  );
-  console.log(weather.json()); */
 }
 
 // updateing data and display
 
 async function updateDataAndDisplay(currentLocObjFrmCls) {
-  console.log("Updating data and display", currentLocObjFrmCls);
+  if (currentLocObjFrmCls.lat !== null && currentLocObjFrmCls.lon !== null) {
+    const coordsData = await getWeatherFromCoords(currentLocObjFrmCls);
 
-  const coordsData = await getWeatherFromCoords(currentLocObjFrmCls);
-  console.log(
-    "Got weather json from api with lat and lon",
-    coordsData.weatherData
-  );
-  if (coordsData.weatherData) {
-    updateDisplay(coordsData.weatherData, currentLocObjFrmCls);
+    if (coordsData) {
+      if (coordsData.weatherData) {
+        updateDisplay(coordsData.weatherData, currentLocObjFrmCls);
+      } else {
+        clearDisplay();
+        displayApiErrror(coordsData.response.statusText);
+      }
+    } else {
+      clearDisplay();
+      displayError("Connnection Error", "Connection Error");
+    }
+  } else {
+    clearDisplay();
+    displayError(
+      "Enable to get location coordinates please ensure location is turned on",
+      "Enable to get location coordinates please ensure location is turned on"
+    );
   }
 }
-
-/* prototype
-promiseState: "fulfilled"
-promiseResult: object
-base: "stations";
- clouds:
-  all: 20
-  prototype: object
-  cod: 200 // sucess or failure means 404
-  coord:
-   lat: 19.233
-   lon: 72.22
-   prototype: object
-   dt: 1234332
-   id: 1274
-   main:
-    feels_like: 28.76
-    grnd_level: 1011
-    humidity: 69
-    pressure: 1011
-    temp: 26.20
-    temp_max: 26.90
-    temp_min: 25.94
-    prototype: object
-    name: "Mumbai"
-    sys:
-     country: "IN"
-     id: 9052
-     sunrise: 1729991207
-     sunset: 1298838
-     type: 1
-     prototype: object
-     timezone: 19800
-     visibility: 1700
-     weather: Array(1)
-     0: 
-      description: "haze"
-      icon: "50d"
-      id: 2433
-      main: "haze"
-      prototype: object
-      wind:
-       deg: 90
-       speed: 2.05
-       prototype: object
-      prototype: object
-   
-   */
-/* if failed
-  prototype
-promiseState: "fulfilled"
-promiseResult: object
- cod: "404"
- message: "city not founcd"
-*/
