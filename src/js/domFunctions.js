@@ -1,10 +1,9 @@
-import { da } from "date-fns/locale";
-import {
-  getElementFromDOM,
-  createElementWithClass,
-  appendElement,
-} from "./utilityFunctions";
 import { formatDate } from "date-fns";
+import {
+  appendElement,
+  createElementWithClass,
+  getElementFromDOM,
+} from "./utilityFunctions";
 
 export function setPlaceholderText() {
   const input = getElementFromDOM("id", "searchBar__text");
@@ -116,13 +115,13 @@ function getWeatherIcon(icon) {
     icon === "wind"
   ) {
     weatherIcon = "clouds";
-  }  else if (
+  } else if (
     icon === "snow" ||
     icon === "snow-showers-day" ||
     icon === "snow-showers-night"
   ) {
     weatherIcon = "snow";
-  } 
+  }
   else if (
     icon === "clear-night" ||
     icon === "partly-cloudy-night" ||
@@ -216,14 +215,7 @@ function decideIcons(icon) {
     iconClass = "fa-cloud-sun";
   } else if (icon === "clear-night" || icon === "partly-cloudy-night") {
     iconClass = "fa-cloud-moon";
-  } else if (
-    icon === "snow" ||
-    icon === "snow-showers-night" ||
-    icon === "snow-showers-day"
-  ) {
-    iconClass = "fa-snowflake";
-  }
-  else if (icon === "wind") {
+  } else if (icon === "wind") {
     iconClass = "fa-wind";
   } else if (icon === "fog") {
     iconClass = "fa-smog";
@@ -235,7 +227,13 @@ function decideIcons(icon) {
     iconClass = "fa-cloud-rain";
   } else if (icon === "thunder-showers-night" || icon === "showers-night") {
     iconClass = "fa-cloud-moon-rain";
-  } 
+  } else if (
+    icon === "snow" ||
+    icon === "snow-showers-night" ||
+    icon === "snow-showers-day"
+  ) {
+    iconClass = "fa-snowflake";
+  }
   return iconClass;
 }
 
